@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Cloud,
   Sun,
@@ -6,30 +6,16 @@ import {
   Wind,
   MapPin,
   Calendar,
-  TrendingUp,
   Search,
-  Menu,
-  X,
   Sparkles,
-  Mountain,
   Umbrella,
   Thermometer,
 } from "lucide-react";
+import Navbar from "../components/navbar";
 
 const WeatherHome = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Floating elements animation
   const FloatingIcon = ({ icon: Icon, delay, duration, x, y }) => (
     <div
       className="absolute opacity-20"
@@ -44,7 +30,7 @@ const WeatherHome = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white from-blue-50 via-purple-50 to-pink-50">
+    <div className="min-h-scree from-blue-50 via-purple-50 to-pink-50">
       <style>{`
         @keyframes float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -67,109 +53,8 @@ const WeatherHome = () => {
         .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
       `}</style>
 
-      {/* Navbar */}
-      <nav
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-white/90 backdrop-blur-lg shadow-lg" : "bg-transparent"
-        }`}
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            {/* Logo */}
-            <div className="flex items-center space-x-2 cursor-pointer group">
-              <div className="relative">
-                <Sun className="h-10 w-10 text-yellow-500 group-hover:rotate-180 transition-transform duration-500" />
-                <Cloud className="h-5 w-5 text-blue-400 absolute -bottom-1 -right-1 group-hover:translate-x-1 transition-transform" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  WeatherWise
-                </h1>
-                <p className="text-xs text-gray-600">NASA Space Apps 2025</p>
-              </div>
-            </div>
-
-            {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-8">
-              <a
-                href="#explore"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1 group"
-              >
-                <MapPin
-                  size={18}
-                  className="group-hover:scale-110 transition-transform"
-                />
-                <span>Explorar</span>
-              </a>
-              <a
-                href="#activities"
-                className="text-gray-700 hover:text-purple-600 transition-colors font-medium flex items-center space-x-1 group"
-              >
-                <Mountain
-                  size={18}
-                  className="group-hover:scale-110 transition-transform"
-                />
-                <span>Actividades</span>
-              </a>
-              <a
-                href="#trends"
-                className="text-gray-700 hover:text-pink-600 transition-colors font-medium flex items-center space-x-1 group"
-              >
-                <TrendingUp
-                  size={18}
-                  className="group-hover:scale-110 transition-transform"
-                />
-                <span>Tendencias</span>
-              </a>
-              <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 font-medium flex items-center space-x-2">
-                <Sparkles size={18} />
-                <span>Comenzar</span>
-              </button>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white/95 backdrop-blur-lg animate-slide-down">
-            <div className="px-4 py-6 space-y-4">
-              <a
-                href="#explore"
-                className="block text-gray-700 hover:text-blue-600 transition-colors font-medium py-2"
-              >
-                🗺️ Explorar
-              </a>
-              <a
-                href="#activities"
-                className="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2"
-              >
-                ⛰️ Actividades
-              </a>
-              <a
-                href="#trends"
-                className="block text-gray-700 hover:text-pink-600 transition-colors font-medium py-2"
-              >
-                📈 Tendencias
-              </a>
-              <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all">
-                ✨ Comenzar
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
-
-      {/* Hero Section */}
+      <Navbar />
       <div className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Floating Background Icons */}
         <FloatingIcon icon={Cloud} delay={0} duration={4} x={10} y={20} />
         <FloatingIcon icon={Sun} delay={1} duration={5} x={85} y={15} />
         <FloatingIcon
@@ -209,7 +94,6 @@ const WeatherHome = () => {
               tu próxima salida al aire libre
             </p>
 
-            {/* Search Bar */}
             <div
               className={`max-w-3xl mx-auto transition-all duration-300 ${
                 searchFocused ? "scale-105" : ""
@@ -252,7 +136,6 @@ const WeatherHome = () => {
             </div>
           </div>
 
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-20 max-w-4xl mx-auto">
             <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer">
               <div className="text-4xl mb-2">🌍</div>
@@ -275,7 +158,6 @@ const WeatherHome = () => {
         </div>
       </div>
 
-      {/* Popular Activities Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <h2 className="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
           Actividades Populares
@@ -329,7 +211,6 @@ const WeatherHome = () => {
         </div>
       </div>
 
-      {/* CTA Section */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-3xl p-12 text-center text-white shadow-2xl relative overflow-hidden">
           <div className="absolute inset-0 opacity-20">
