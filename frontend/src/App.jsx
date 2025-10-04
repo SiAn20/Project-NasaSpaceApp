@@ -1,9 +1,9 @@
-import "./App.css";
+import WeatherHome from "./pages/home";
 
 function App() {
   return (
     <>
-      <div className="text-3xl font-bold underline">Hello world!</div>
+      <WeatherHome />
     </>
   );
 }
