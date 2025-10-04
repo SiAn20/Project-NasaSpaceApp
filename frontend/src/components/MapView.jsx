@@ -34,7 +34,8 @@ const RecenterMap = ({ position }) => {
   const map = useMap();
   useEffect(() => {
     if (position) {
-      map.setView(position, 10);
+      // Solo centrar la vista sin cambiar el zoom
+      map.setView(position, map.getZoom());
     }
   }, [position, map]);
   return null;
@@ -47,7 +48,7 @@ const MapView = ({ onLocationSelect, position, className = "" }) => {
     <div className={`w-full h-full ${className}`}>
       <MapContainer
         center={position || defaultCenter}
-        zoom={position ? 10 : 4}
+        zoom={4}
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={true}
         dragging={true}
