@@ -33,9 +33,13 @@ class WeatherProbabilityService {
         throw new Error("NO_HISTORICAL_DATA");
       }
 
+      console.log("historialData", historicalData);
+
       const probabilities = this.calculateExtremeProbabilities(historicalData);
       const expectedValues = this.calculateExpectedValues(historicalData);
       const discomfortAnalysis = this.analyzeDiscomfort(historicalData);
+
+      console.log("Probabilities:", probabilities);
 
       return {
         success: true,
@@ -137,16 +141,30 @@ class WeatherProbabilityService {
       .map((d) => d.precipitation)
       .filter((p) => p !== null && p !== -999);
 
-    const tempP95 = this.percentile(temps, 95);
-    const tempP5 = this.percentile(temps, 5);
-    const windP90 = this.percentile(windSpeed, 90);
-    const humidityP90 = this.percentile(humidity, 90);
+    const mean = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
+    const std = (arr) => {
+      const m = mean(arr);
+      return Math.sqrt(arr.reduce((a, b) => a + (b - m) ** 2, 0) / arr.length);
+    };
 
-    const veryHotDays = temps.filter((t) => t > tempP95).length;
-    const veryColdDays = temps.filter((t) => t < tempP5).length;
-    const veryWindyDays = windSpeed.filter((w) => w > windP90).length;
-    const veryHumidDays = humidity.filter((h) => h > humidityP90).length;
-    const rainyDays = precipitation.filter((p) => p > 5).length;
+    const tempMean = mean(temps);
+    const tempStd = std(temps);
+    const humidityMean = mean(humidity);
+    const humidityStd = std(humidity);
+    const windMean = mean(windSpeed);
+    const windStd = std(windSpeed);
+
+    const tempHotThreshold = tempMean + tempStd;
+    const tempColdThreshold = tempMean - tempStd;
+    const windThreshold = windMean + windStd;
+    const humidityThreshold = humidityMean + humidityStd;
+    const rainThreshold = 5;
+
+    const veryHotDays = temps.filter((t) => t > tempHotThreshold).length;
+    const veryColdDays = temps.filter((t) => t < tempColdThreshold).length;
+    const veryWindyDays = windSpeed.filter((w) => w > windThreshold).length;
+    const veryHumidDays = humidity.filter((h) => h > humidityThreshold).length;
+    const rainyDays = precipitation.filter((p) => p > rainThreshold).length;
 
     const total = historicalData.length;
 
@@ -158,30 +176,30 @@ class WeatherProbabilityService {
     return {
       veryHot: {
         probability: ((veryHotDays / total) * 100).toFixed(1),
-        threshold: tempP95.toFixed(1),
+        threshold: tempHotThreshold.toFixed(1),
         unit: "°C",
-        description: `Temperatura superior a ${tempP95.toFixed(1)}°C`,
+        description: `Temperatura superior a ${tempHotThreshold.toFixed(1)}°C`,
         occurrences: veryHotDays,
       },
       veryCold: {
         probability: ((veryColdDays / total) * 100).toFixed(1),
-        threshold: tempP5.toFixed(1),
+        threshold: tempColdThreshold.toFixed(1),
         unit: "°C",
-        description: `Temperatura inferior a ${tempP5.toFixed(1)}°C`,
+        description: `Temperatura inferior a ${tempColdThreshold.toFixed(1)}°C`,
         occurrences: veryColdDays,
       },
       veryWindy: {
         probability: ((veryWindyDays / total) * 100).toFixed(1),
-        threshold: windP90.toFixed(1),
+        threshold: windThreshold.toFixed(1),
         unit: "m/s",
-        description: `Viento superior a ${windP90.toFixed(1)} m/s`,
+        description: `Viento superior a ${windThreshold.toFixed(1)} m/s`,
         occurrences: veryWindyDays,
       },
       veryHumid: {
         probability: ((veryHumidDays / total) * 100).toFixed(1),
-        threshold: humidityP90.toFixed(1),
+        threshold: humidityThreshold.toFixed(1),
         unit: "%",
-        description: `Humedad superior a ${humidityP90.toFixed(1)}%`,
+        description: `Humedad superior a ${humidityThreshold.toFixed(1)}%`,
         occurrences: veryHumidDays,
       },
       rainy: {
@@ -189,7 +207,7 @@ class WeatherProbabilityService {
           precipitation.length > 0
             ? ((rainyDays / total) * 100).toFixed(1)
             : "0.0",
-        threshold: "5.0",
+        threshold: rainThreshold.toFixed(1),
         unit: "mm",
         description: "Precipitación superior a 5 mm/día",
         occurrences: rainyDays,
