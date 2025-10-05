@@ -1,16 +1,20 @@
 import { createApp } from "./app.js";
 import { env } from "./config/env.js";
 
-const PORT = env.port;
 const app = createApp();
 
+
+const PORT = process.env.PORT || env.port || 4000;
+
 async function start() {
-  app.listen(PORT, () => {
-    console.log(`API listening on http://127.0.0.1:${PORT}`);
-  });
+  try {
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`✅ API listening on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to start server:", err);
+    process.exit(1);
+  }
 }
 
-start().catch((err) => {
-  console.error("Failed to start server:", err);
-  process.exit(1);
-});
+start();
