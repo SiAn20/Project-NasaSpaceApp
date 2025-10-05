@@ -62,7 +62,6 @@ const WeatherExplorer = () => {
             </div>
           </div>
 
-          {/* Inputs de rango de fechas */}
           <div className="flex items-center space-x-2 mb-3 text-sm">
             <Calendar size={16} />
             <div className="flex flex-col w-full">

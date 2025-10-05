@@ -3,15 +3,51 @@ import {
   MapPin,
   Calendar,
   Cloud,
-  TrendingUp,
   Download,
   Share2,
   Clock,
+  Sparkles,
+  X,
+  Loader2,
 } from "lucide-react";
 import WeatherCard from "./WeatherCard";
 
 const WeatherPanel = ({ dataDaily, dataHourly }) => {
   const [selectedTab, setSelectedTab] = useState("overview");
+  const [showAIInsights, setShowAIInsights] = useState(false);
+  const [aiInterpretation, setAiInterpretation] = useState("");
+  const [isLoadingAI, setIsLoadingAI] = useState(false);
+
+  const handleAIInterpretation = async () => {
+    setIsLoadingAI(true);
+    setShowAIInsights(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/ai/interpret", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          weatherData: dataDaily.data,
+          location: dataDaily.location,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setAiInterpretation(data.interpretation);
+      } else {
+        setAiInterpretation(
+          "❌ No se pudo obtener la interpretación. Intenta de nuevo."
+        );
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setAiInterpretation("❌ Error de conexión con el servidor.");
+    } finally {
+      setIsLoadingAI(false);
+    }
+  };
 
   if (!dataDaily) {
     return (
@@ -86,6 +122,55 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
           ))}
         </div>
       </div>
+
+      {/* MODAL DE INSIGHTS DE IA */}
+      {showAIInsights && (
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-fade-in-up">
+            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <Sparkles className="text-white" size={24} />
+                <h3 className="text-2xl font-bold text-white">
+                  Interpretación con IA
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAIInsights(false)}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors"
+              >
+                <X className="text-white" size={24} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {isLoadingAI ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <Loader2
+                    className="animate-spin text-purple-500 mb-4"
+                    size={48}
+                  />
+                  <p className="text-gray-600">Analizando datos con IA...</p>
+                </div>
+              ) : (
+                <div className="prose prose-lg max-w-none">
+                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {aiInterpretation}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-gray-200 bg-gray-50">
+              <button
+                onClick={() => setShowAIInsights(false)}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto p-6">
         {/* --- TAB OVERVIEW --- */}

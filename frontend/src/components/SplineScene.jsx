@@ -13,8 +13,8 @@ export default function SplineScene() {
 
   return (
     <div className="w-full relative group overflow-hidden rounded-full">
-      <div className="w-full h-[80dvh] transition-transform duration-500 group-hover:scale-110">
-        <div className="w-full h-[80dvh] scale-110">
+      <div className="w-full h-[80dvh] transition-transform duration-500">
+        <div className="w-full h-full scale-110">
           <Spline
             scene="https://prod.spline.design/g-DW0juYbIlS6oaU/scene.splinecode"
             onLoad={onLoad}
