@@ -5,10 +5,6 @@ class HourlyProbabilityService {
     this.nasaService = new NasaService();
   }
 
-  /**
-   * Calcula probabilidades de condiciones extremas para una fecha y HORA específica
-   * basándose en datos históricos horarios
-   */
   async calculateHourlyProbabilities({
     longitude,
     latitude,
@@ -17,23 +13,19 @@ class HourlyProbabilityService {
     yearsBack = 5,
   }) {
     try {
-      // Validar hora
       const hour = parseInt(targetHour);
       if (hour < 0 || hour > 23) {
         throw new Error("INVALID_HOUR");
       }
 
-      // Extraer mes y día de la fecha objetivo
       const month = targetDate.substring(4, 6);
       const day = targetDate.substring(6, 8);
       const targetYear = parseInt(targetDate.substring(0, 4));
 
-      // Calcular rango de años históricos
       const currentYear = new Date().getFullYear();
       const endYear = Math.min(targetYear - 1, currentYear);
-      const startYear = Math.max(endYear - yearsBack + 1, 2001); // Datos horarios desde 2001
+      const startYear = Math.max(endYear - yearsBack + 1, 2001);
 
-      // Obtener datos históricos horarios
       const historicalData = await this.fetchHistoricalHourlyData({
         longitude,
         latitude,
@@ -48,17 +40,10 @@ class HourlyProbabilityService {
         throw new Error("NO_HISTORICAL_DATA");
       }
 
-      // Calcular probabilidades
       const probabilities =
         this.calculateHourlyExtremeProbabilities(historicalData);
-
-      // Calcular valores esperados
       const expectedValues = this.calculateHourlyExpectedValues(historicalData);
-
-      // Análisis de condiciones específicas de la hora
       const hourAnalysis = this.analyzeHourConditions(historicalData, hour);
-
-      // Recomendaciones basadas en la hora
       const recommendations = this.generateHourlyRecommendations(
         probabilities,
         hourAnalysis,
@@ -87,9 +72,6 @@ class HourlyProbabilityService {
     }
   }
 
-  /**
-   * Obtiene datos históricos para la misma fecha y hora en múltiples años
-   */
   async fetchHistoricalHourlyData({
     longitude,
     latitude,
@@ -101,10 +83,8 @@ class HourlyProbabilityService {
   }) {
     const historicalData = [];
 
-    // Obtener datos año por año
     for (let year = startYear; year <= endYear; year++) {
       try {
-        // Obtener el día completo para extraer la hora específica
         const dateStr = `${year}${month}${day}`;
 
         const result = await this.nasaService.getHourlyWeatherData({
@@ -115,7 +95,6 @@ class HourlyProbabilityService {
         });
 
         if (result.success && result.data.hourly.length > 0) {
-          // Filtrar solo la hora específica
           const hourData = result.data.hourly.find((h) => h.hour === hour);
 
           if (hourData && this.isValidHourlyData(hourData)) {
@@ -126,14 +105,12 @@ class HourlyProbabilityService {
           }
         }
 
-        // Pequeño delay para no saturar la API
         await this.sleep(200);
       } catch (error) {
         console.warn(
           `No hourly data available for year ${year}:`,
           error.message
         );
-        // Continuar con los demás años
       }
     }
 
@@ -144,9 +121,6 @@ class HourlyProbabilityService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  /**
-   * Valida que los datos horarios sean utilizables
-   */
   isValidHourlyData(hourData) {
     return (
       hourData.temperature !== null &&
@@ -158,9 +132,6 @@ class HourlyProbabilityService {
     );
   }
 
-  /**
-   * Calcula probabilidades de condiciones extremas para una hora específica
-   */
   calculateHourlyExtremeProbabilities(historicalData) {
     const temps = historicalData.map((d) => d.temperature);
     const humidity = historicalData.map((d) => d.humidity);
@@ -169,58 +140,75 @@ class HourlyProbabilityService {
       .map((d) => d.precipitation)
       .filter((p) => p !== null && p !== -999);
 
-    // Calcular percentiles
-    const tempP95 = this.percentile(temps, 95);
-    const tempP5 = this.percentile(temps, 5);
-    const windP90 = this.percentile(windSpeed, 90);
-    const humidityP90 = this.percentile(humidity, 90);
+    const mean = (arr) => arr.reduce((sum, v) => sum + v, 0) / arr.length;
+    const std = (arr) => {
+      const m = mean(arr);
+      return Math.sqrt(
+        arr.reduce((sum, v) => sum + (v - m) ** 2, 0) / arr.length
+      );
+    };
 
-    // Contar eventos extremos
-    const veryHotHours = temps.filter((t) => t > tempP95).length;
-    const veryColdHours = temps.filter((t) => t < tempP5).length;
-    const veryWindyHours = windSpeed.filter((w) => w > windP90).length;
-    const veryHumidHours = humidity.filter((h) => h > humidityP90).length;
-    const rainyHours = precipitation.filter((p) => p > 2).length; // >2mm/hora
+    const tempMean = mean(temps);
+    const tempStd = std(temps);
+    const humidityMean = mean(humidity);
+    const humidityStd = std(humidity);
+    const windMean = mean(windSpeed);
+    const windStd = std(windSpeed);
+
+    const tempHotThreshold = tempMean + tempStd;
+    const tempColdThreshold = tempMean - tempStd;
+    const windThreshold = windMean + windStd;
+    const humidityThreshold = humidityMean + humidityStd;
+    const rainThreshold = 2; // mm/hora
 
     const total = historicalData.length;
 
-    // Calcular sensación térmica
+    const veryHotHours = temps.filter((t) => t > tempHotThreshold).length;
+    const veryColdHours = temps.filter((t) => t < tempColdThreshold).length;
+    const veryWindyHours = windSpeed.filter((w) => w > windThreshold).length;
+    const veryHumidHours = humidity.filter((h) => h > humidityThreshold).length;
+    const rainyHours = precipitation.filter((p) => p > rainThreshold).length;
+
     const uncomfortableHours = historicalData.filter((hour) => {
       const feelsLike = this.calculateFeelsLike(
         hour.temperature,
         hour.humidity,
         hour.windSpeed
       );
-      return feelsLike > 28 || feelsLike < 3 || hour.windSpeed > 8;
+      return (
+        feelsLike > tempMean + tempStd ||
+        feelsLike < tempMean - tempStd ||
+        hour.windSpeed > windThreshold
+      );
     }).length;
 
     return {
       veryHot: {
         probability: ((veryHotHours / total) * 100).toFixed(1),
-        threshold: tempP95.toFixed(1),
+        threshold: tempHotThreshold.toFixed(1),
         unit: "°C",
-        description: `Temperatura superior a ${tempP95.toFixed(1)}°C`,
+        description: `Temperatura superior a ${tempHotThreshold.toFixed(1)}°C`,
         occurrences: veryHotHours,
       },
       veryCold: {
         probability: ((veryColdHours / total) * 100).toFixed(1),
-        threshold: tempP5.toFixed(1),
+        threshold: tempColdThreshold.toFixed(1),
         unit: "°C",
-        description: `Temperatura inferior a ${tempP5.toFixed(1)}°C`,
+        description: `Temperatura inferior a ${tempColdThreshold.toFixed(1)}°C`,
         occurrences: veryColdHours,
       },
       veryWindy: {
         probability: ((veryWindyHours / total) * 100).toFixed(1),
-        threshold: windP90.toFixed(1),
+        threshold: windThreshold.toFixed(1),
         unit: "m/s",
-        description: `Viento superior a ${windP90.toFixed(1)} m/s`,
+        description: `Viento superior a ${windThreshold.toFixed(1)} m/s`,
         occurrences: veryWindyHours,
       },
       veryHumid: {
         probability: ((veryHumidHours / total) * 100).toFixed(1),
-        threshold: humidityP90.toFixed(1),
+        threshold: humidityThreshold.toFixed(1),
         unit: "%",
-        description: `Humedad superior a ${humidityP90.toFixed(1)}%`,
+        description: `Humedad superior a ${humidityThreshold.toFixed(1)}%`,
         occurrences: veryHumidHours,
       },
       rainy: {
@@ -228,23 +216,20 @@ class HourlyProbabilityService {
           precipitation.length > 0
             ? ((rainyHours / total) * 100).toFixed(1)
             : "0.0",
-        threshold: "2.0",
+        threshold: rainThreshold.toFixed(1),
         unit: "mm/hora",
-        description: "Precipitación superior a 2 mm/hora",
+        description: `Precipitación superior a ${rainThreshold} mm/hora`,
         occurrences: rainyHours,
       },
       veryUncomfortable: {
         probability: ((uncomfortableHours / total) * 100).toFixed(1),
         description:
-          "Condiciones incómodas para esta hora (sensación térmica extrema o viento fuerte)",
+          "Condiciones incómodas (sensación térmica extrema o viento fuerte)",
         occurrences: uncomfortableHours,
       },
     };
   }
 
-  /**
-   * Calcula valores esperados para la hora específica
-   */
   calculateHourlyExpectedValues(historicalData) {
     const temps = historicalData.map((d) => d.temperature);
     const humidity = historicalData.map((d) => d.humidity);
@@ -253,7 +238,6 @@ class HourlyProbabilityService {
       .map((d) => d.precipitation)
       .filter((p) => p !== null && p !== -999);
 
-    // Calcular sensación térmica promedio
     const feelsLike = historicalData.map((d) =>
       this.calculateFeelsLike(d.temperature, d.humidity, d.windSpeed)
     );
@@ -300,9 +284,6 @@ class HourlyProbabilityService {
     };
   }
 
-  /**
-   * Analiza condiciones específicas según la hora del día
-   */
   analyzeHourConditions(historicalData, hour) {
     const avgTemp = this.average(historicalData.map((d) => d.temperature));
     const avgHumidity = this.average(historicalData.map((d) => d.humidity));
@@ -313,7 +294,6 @@ class HourlyProbabilityService {
         .filter((p) => p !== null && p !== -999)
     );
 
-    // Determinar período del día
     let periodOfDay, periodDescription;
     if (hour >= 0 && hour < 6) {
       periodOfDay = "dawn";
@@ -329,7 +309,6 @@ class HourlyProbabilityService {
       periodDescription = "Noche";
     }
 
-    // Evaluar condiciones
     const conditions = {
       period: periodOfDay,
       periodDescription,
@@ -351,7 +330,6 @@ class HourlyProbabilityService {
       },
     };
 
-    // Calcular visibilidad típica (basada en humedad y precipitación)
     const visibility = this.estimateVisibility(avgHumidity, avgPrecip);
 
     return {
@@ -361,11 +339,7 @@ class HourlyProbabilityService {
     };
   }
 
-  /**
-   * Calcula sensación térmica (Wind Chill + Heat Index combinado)
-   */
   calculateFeelsLike(temp, humidity, windSpeed) {
-    // Si hace frío y hay viento, usar Wind Chill
     if (temp <= 10 && windSpeed > 1.34) {
       const windKmh = windSpeed * 3.6;
       const windChill =
@@ -376,7 +350,6 @@ class HourlyProbabilityService {
       return windChill;
     }
 
-    // Si hace calor y hay humedad, usar Heat Index
     if (temp >= 20 && humidity > 40) {
       const T = temp;
       const RH = humidity;
@@ -390,7 +363,6 @@ class HourlyProbabilityService {
       return heatIndex;
     }
 
-    // En otros casos, retornar temperatura real
     return temp;
   }
 
@@ -478,7 +450,6 @@ class HourlyProbabilityService {
 
     const { temperature, wind, precipitation } = hourAnalysis;
 
-    // Recomendaciones de vestimenta
     if (temperature.level === "muy_frio" || temperature.level === "frio") {
       recommendations.clothing.push("Usar ropa abrigada y capas");
       if (wind.level === "viento_fuerte" || wind.level === "muy_ventoso") {
@@ -494,7 +465,6 @@ class HourlyProbabilityService {
       recommendations.precautions.push("Mantenerse hidratado");
     }
 
-    // Recomendaciones de actividades
     if (hourAnalysis.overallCondition.rating === "ideal") {
       recommendations.activities.push(
         "Excelente hora para actividades al aire libre"
@@ -512,7 +482,6 @@ class HourlyProbabilityService {
       recommendations.precautions.push("Llevar paraguas");
     }
 
-    // Recomendaciones según hora del día
     if (hour >= 12 && hour <= 15 && temperature.level === "muy_caliente") {
       recommendations.precautions.push(
         "Evitar exposición solar prolongada en horas pico"
@@ -526,7 +495,6 @@ class HourlyProbabilityService {
       );
     }
 
-    // Probabilidades altas
     if (parseFloat(probabilities.veryWindy.probability) > 30) {
       recommendations.precautions.push(
         `Alta probabilidad (${probabilities.veryWindy.probability}%) de vientos fuertes`
@@ -542,7 +510,6 @@ class HourlyProbabilityService {
     return recommendations;
   }
 
-  // Utilidades matemáticas
   percentile(arr, p) {
     const sorted = [...arr].sort((a, b) => a - b);
     const index = (p / 100) * (sorted.length - 1);
