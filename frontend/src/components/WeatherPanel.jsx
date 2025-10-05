@@ -6,13 +6,14 @@ import {
   TrendingUp,
   Download,
   Share2,
+  Clock,
 } from "lucide-react";
 import WeatherCard from "./WeatherCard";
 
-const WeatherPanel = ({ data, onDateRangeChange }) => {
+const WeatherPanel = ({ dataDaily, dataHourly }) => {
   const [selectedTab, setSelectedTab] = useState("overview");
 
-  if (!data) {
+  if (!dataDaily) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500 p-8 text-center">
         <div className="bg-gradient-to-br from-blue-100 to-purple-100 p-6 rounded-2xl mb-4">
@@ -29,7 +30,7 @@ const WeatherPanel = ({ data, onDateRangeChange }) => {
     );
   }
 
-  const { location, dateRange, data: weatherData } = data;
+  const { location, data: weatherData } = dataDaily;
   const { statistics, daily, metadata } = weatherData;
 
   const formatValue = (value, units) => {
@@ -68,7 +69,7 @@ const WeatherPanel = ({ data, onDateRangeChange }) => {
         </div>
 
         <div className="flex space-x-4">
-          {["overview", "daily", "stats"].map((tab) => (
+          {["overview", "daily", "hours"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
@@ -80,13 +81,14 @@ const WeatherPanel = ({ data, onDateRangeChange }) => {
             >
               {tab === "overview" && "Resumen"}
               {tab === "daily" && "Diario"}
-              {tab === "stats" && "Estadísticas"}
+              {tab === "hours" && "Horas"}
             </button>
           ))}
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-6">
+        {/* --- TAB OVERVIEW --- */}
         {selectedTab === "overview" && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
@@ -147,6 +149,7 @@ const WeatherPanel = ({ data, onDateRangeChange }) => {
           </div>
         )}
 
+        {/* --- TAB DAILY --- */}
         {selectedTab === "daily" && (
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-800 mb-4">Datos Diarios</h3>
@@ -161,7 +164,7 @@ const WeatherPanel = ({ data, onDateRangeChange }) => {
                     {formatValue(day.temperature, "°C")}
                   </span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 text-xs">
+                <div className="grid grid-cols-4 gap-2 text-xs text-black">
                   <div className="text-center">
                     <p className="text-gray-600">Precip.</p>
                     <p className="font-semibold">
@@ -192,49 +195,54 @@ const WeatherPanel = ({ data, onDateRangeChange }) => {
           </div>
         )}
 
-        {selectedTab === "stats" && (
-          <div className="space-y-6">
-            <h3 className="font-semibold text-gray-800">
-              Estadísticas Detalladas
-            </h3>
-            {Object.entries(statistics).map(([key, stats]) => {
-              const paramName =
-                key === "PRECTOTCORR"
-                  ? "Precipitación"
-                  : key === "T2M"
-                  ? "Temperatura"
-                  : key === "RH2M"
-                  ? "Humedad"
-                  : key === "WS10M"
-                  ? "Velocidad del Viento"
-                  : key === "PS"
-                  ? "Presión"
-                  : "Radiación Solar";
-
-              return (
-                <div key={key} className="bg-white rounded-xl p-4 shadow-sm">
-                  <p className="font-semibold text-gray-800 mb-3">
-                    {paramName}
-                  </p>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div className="text-center">
-                      <p className="text-gray-600">Mínimo</p>
-                      <p className="font-semibold text-blue-600">{stats.min}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-gray-600">Promedio</p>
-                      <p className="font-semibold text-green-600">
-                        {stats.avg.toFixed(2)}
-                      </p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-gray-600">Máximo</p>
-                      <p className="font-semibold text-red-600">{stats.max}</p>
-                    </div>
+        {/* --- TAB HOURS --- */}
+        {selectedTab === "hours" && (
+          <div className="space-y-4">
+            <h3 className="font-semibold text-gray-800 mb-4">Datos Horarios</h3>
+            {dataHourly?.data?.hourly?.map((hour, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
+              >
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Clock size={16} className="text-blue-500" />
+                    <p className="font-semibold text-gray-800">
+                      {hour.dateTime}
+                    </p>
+                  </div>
+                  <span className="text-sm text-gray-500">
+                    {formatValue(hour.temperature, "°C")}
+                  </span>
+                </div>
+                <div className="grid grid-cols-4 gap-2 text-xs text-black">
+                  <div className="text-center">
+                    <p className="text-gray-600">Precip.</p>
+                    <p className="font-semibold">
+                      {formatValue(hour.precipitation, "mm")}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-600">Humedad</p>
+                    <p className="font-semibold">
+                      {formatValue(hour.humidity, "%")}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-600">Viento</p>
+                    <p className="font-semibold">
+                      {formatValue(hour.windSpeed, "m/s")}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-gray-600">Radiación</p>
+                    <p className="font-semibold">
+                      {formatValue(hour.solarRadiation, "kW-hr")}
+                    </p>
                   </div>
                 </div>
-              );
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>

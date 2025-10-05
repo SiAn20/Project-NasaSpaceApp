@@ -62,17 +62,12 @@ const WeatherCard = ({ label, value, type = "default", trend, subtitle }) => {
         )}
       </div>
 
-      <div
-        className={`absolute inset-0 rounded-2xl bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity ${
-          type === "temperature"
-            ? "from-red-400 to-orange-400"
-            : type === "humidity"
-            ? "from-blue-400 to-cyan-400"
-            : type === "windSpeed"
-            ? "from-green-400 to-emerald-400"
-            : "from-gray-400 to-blue-400"
-        }`}
-      ></div>
+        {/* <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br opacity-0 group-hover:opacity-5 transition-opacity ${
+          type === 'temperature' ? 'from-red-400 to-orange-400' :
+          type === 'humidity' ? 'from-blue-400 to-cyan-400' :
+          type === 'windSpeed' ? 'from-green-400 to-emerald-400' :
+          'from-gray-400 to-blue-400'
+        }`}></div> */}
     </div>
   );
 };
