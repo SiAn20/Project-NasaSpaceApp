@@ -12,4 +12,12 @@ router.get("/weather-data/hourly", (req, res) =>
   nasaController.getHourlyWeatherData(req, res)
 );
 
+router.get("/weather-probabilities", (req, res) =>
+  nasaController.getWeatherProbabilities(req, res)
+);
+
+router.get("/weather-probabilities/hourly", (req, res) =>
+  nasaController.getHourlyWeatherProbabilities(req, res)
+);
+
 export default router;
