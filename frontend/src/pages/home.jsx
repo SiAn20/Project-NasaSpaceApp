@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Cloud,
   Sun,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 const WeatherHome = () => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
@@ -92,13 +94,10 @@ const WeatherHome = () => {
             {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               <a
-                href="#explore"
-                className="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1 group"
+                onClick={() => navigate("/explorar")}
+                className="cursor-pointer text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center space-x-1 group"
               >
-                <MapPin
-                  size={18}
-                  className="group-hover:scale-110 transition-transform"
-                />
+                <MapPin size={18} className="group-hover:scale-110 transition-transform" />
                 <span>Explorar</span>
               </a>
               <a
@@ -121,7 +120,10 @@ const WeatherHome = () => {
                 />
                 <span>Tendencias</span>
               </a>
-              <button className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 font-medium flex items-center space-x-2">
+              <button
+                onClick={() => navigate("/explorar")}
+                className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-2 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 font-medium flex items-center space-x-2"
+              >
                 <Sparkles size={18} />
                 <span>Comenzar</span>
               </button>
@@ -352,7 +354,10 @@ const WeatherHome = () => {
             <p className="text-xl mb-8 opacity-90">
               Obtén insights precisos basados en décadas de datos de la NASA
             </p>
-            <button className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-bold hover:shadow-2xl hover:scale-110 transition-all duration-300 inline-flex items-center space-x-2">
+            <button
+              onClick={() => navigate("/explorar")}
+              className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-bold hover:shadow-2xl hover:scale-110 transition-all duration-300 inline-flex items-center space-x-2"
+            >
               <Sparkles size={24} />
               <span>Comenzar Ahora Gratis</span>
             </button>
