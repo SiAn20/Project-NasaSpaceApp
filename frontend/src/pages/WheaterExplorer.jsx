@@ -45,10 +45,8 @@ const WeatherExplorer = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
-      {/* Panel del Mapa */}
-      <div className="z-50 flex-1 relative p-6">
-        {/* Header del Mapa */}
+    <div className="pt-20 flex h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 overflow-hidden">
+      <div className="z-50 flex-1 relative px-6">
         <div className="absolute top-8 left-20 z-[1000] bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-4 w-80">
           <div className="flex items-center space-x-3 mb-3">
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-xl">
@@ -130,7 +128,6 @@ const WeatherExplorer = () => {
           </div>
         </div>
 
-        {/* Mapa */}
         <div className="h-full z-100">
           <MapView
             onLocationSelect={handleLocationSelect}
@@ -139,7 +136,6 @@ const WeatherExplorer = () => {
         </div>
       </div>
 
-      {/* Panel del Clima */}
       <div className="w-96 xl:w-[480px] bg-white rounded-l-3xl shadow-2xl border-l border-gray-200 z-0">
         {loading ? (
           <div className="h-full flex items-center justify-center">
