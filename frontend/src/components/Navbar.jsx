@@ -28,26 +28,29 @@ const WeatherHome = () => {
     <div>
       <nav
         className={`fixed w-full z-50 transition-all duration-300 ${
-          scrolled ? "bg-white/90 backdrop-blur-lg shadow-lg" : "bg-transparent"
+          scrolled
+            ? "bg-background/80 backdrop-blur-lg shadow-lg"
+            : "bg-transparent"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
-            {/* Logo */}
             <div className="flex items-center space-x-2 cursor-pointer group">
               <div className="relative">
                 <Sun className="h-10 w-10 text-yellow-500 group-hover:rotate-180 transition-transform duration-500" />
                 <Cloud className="h-5 w-5 text-blue-400 absolute -bottom-1 -right-1 group-hover:translate-x-1 transition-transform" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                  WeatherWise
+                <h1
+                  className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
+                  onClick={() => navigate("/")}
+                >
+                  ChocoSpace
                 </h1>
                 <p className="text-xs text-gray-600">NASA Space Apps 2025</p>
               </div>
             </div>
 
-            {/* Desktop Menu */}
             <div className="hidden md:flex items-center space-x-8">
               <a
                 onClick={() => navigate("/explorar")}
@@ -88,7 +91,6 @@ const WeatherHome = () => {
               </button>
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -98,7 +100,6 @@ const WeatherHome = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden bg-white/95 backdrop-blur-lg animate-slide-down">
             <div className="px-4 py-6 space-y-4">
