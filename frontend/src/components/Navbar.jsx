@@ -36,10 +36,13 @@ const WeatherHome = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-2 cursor-pointer group">
-              <div className="relative mr-2">
-                <Sun className="h-10 w-10 text-yellow-500 group-hover:rotate-180 transition-transform duration-500" />
-                <Cloud className="h-5 w-5 text-blue-400 absolute -bottom-1 -right-1 group-hover:translate-x-1 transition-transform" />
+            <div className="relative mr-2">
+              <div className="relative">
+                <Sun className="h-10 w-10 text-yellow-500 group-hover:rotate-180 transition-transform duration-500 drop-shadow-lg" />
+                <div className="absolute inset-0 bg-yellow-200 rounded-full blur-sm group-hover:blur-md transition-all duration-500 opacity-70"></div>
               </div>
+              <Cloud className="h-6 w-6 text-white absolute bottom-0 right-0 group-hover:translate-x-1 transition-transform duration-300 z-10 drop-shadow-md" />
+            </div>
               <div>
                 <h1
                   className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
