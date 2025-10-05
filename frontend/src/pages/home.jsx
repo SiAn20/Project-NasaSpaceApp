@@ -12,6 +12,7 @@ import {
   Thermometer,
 } from "lucide-react";
 import Navbar from "../components/navbar";
+import { World } from "../components/world";
 
 const WeatherHome = () => {
   const [searchFocused, setSearchFocused] = useState(false);
@@ -54,6 +55,8 @@ const WeatherHome = () => {
       `}</style>
 
       <Navbar />
+      <World />
+
       <div className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <FloatingIcon icon={Cloud} delay={0} duration={4} x={10} y={20} />
         <FloatingIcon icon={Sun} delay={1} duration={5} x={85} y={15} />
@@ -233,9 +236,9 @@ const WeatherHome = () => {
             <p className="text-xl mb-8 opacity-90">
               Obtén insights precisos basados en décadas de datos de la NASA
             </p>
-            <button className="bg-white text-purple-600 px-8 py-4 rounded-full text-lg font-bold hover:shadow-2xl hover:scale-110 transition-all duration-300 inline-flex items-center space-x-2">
+            <button className="bg-background text-purple-600 px-8 py-4 rounded-full text-lg font-bold hover:shadow-2xl hover:scale-110 transition-all duration-300 inline-flex items-center space-x-2">
               <Sparkles size={24} />
-              <span>Comenzar Ahora Gratis</span>
+              <span>Comenzar Ahora</span>
             </button>
           </div>
         </div>
