@@ -12,7 +12,7 @@ import {
   Umbrella,
   Thermometer,
 } from "lucide-react";
-
+import SplineScene from "../components/SplineScene";
 
 const WeatherHome = () => {
   const navigate = useNavigate();
@@ -75,28 +75,34 @@ const WeatherHome = () => {
           y={40}
         />
 
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="animate-fade-in-up">
-            <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
-              <Sparkles size={16} />
-              <span className="text-sm font-medium">
-                Powered by NASA Earth Data
-              </span>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="animate-fade-in-up text-center lg:text-left">
+              <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
+                <Sparkles size={16} />
+                <span className="text-sm font-medium">
+                  Powered by NASA Earth Data
+                </span>
+              </div>
+
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
+                Planifica tu aventura
+                <br />
+                con confianza
+              </h1>
+
+              <p className="text-lg sm:text-xl text-gray-600 mb-8">
+                Descubre la probabilidad de condiciones climáticas perfectas
+                para tu próxima salida al aire libre
+              </p>
             </div>
 
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
-              Planifica tu aventura
-              <br />
-              con confianza
-            </h1>
-
-            <p className="text-xl sm:text-2xl text-gray-600 mb-12 max-w-3xl mx-auto">
-              Descubre la probabilidad de condiciones climáticas perfectas para
-              tu próxima salida al aire libre
-            </p>
+            <div className="relative">
+              <SplineScene />
+            </div>
 
             <div
-              className={`max-w-3xl mx-auto transition-all duration-300 ${
+              className={`max-w-3xl mx-auto mt-12 transition-all duration-300 ${
                 searchFocused ? "scale-105" : ""
               }`}
             >

@@ -38,7 +38,6 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
     return `${value} ${units}`;
   };
 
-  // Calcular tendencias (simulado)
   const calculateTrend = (current, previous) => {
     if (previous === 0 || current === -999 || previous === -999) return 0;
     return (((current - previous) / previous) * 100).toFixed(1);
@@ -46,7 +45,6 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
 
   return (
     <div className="h-full flex flex-col bg-gradient-to-b from-white to-blue-50">
-      {/* Header */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <div>
@@ -70,7 +68,6 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex space-x-4">
           {["overview", "daily", "hours"].map((tab) => (
             <button
