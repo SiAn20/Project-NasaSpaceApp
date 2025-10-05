@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import nasaRoutes from "./routes/nasa.routes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 export const createApp = () => {
   const app = express();
@@ -16,6 +17,7 @@ export const createApp = () => {
   });
 
   app.use("/api/nasa", nasaRoutes);
+  app.use("/api/ai", aiRoutes);
 
   return app;
 };
