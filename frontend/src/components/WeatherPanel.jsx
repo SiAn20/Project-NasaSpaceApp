@@ -1,13 +1,5 @@
 import React, { useState } from "react";
-import {
-  MapPin,
-  Calendar,
-  Cloud,
-  TrendingUp,
-  Download,
-  Share2,
-  Clock,
-} from "lucide-react";
+import { MapPin, Cloud, Download, Share2, Clock } from "lucide-react";
 import WeatherCard from "./WeatherCard";
 
 const WeatherPanel = ({ dataDaily, dataHourly }) => {
