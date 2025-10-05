@@ -2,7 +2,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { nasaAPI } from "../services/api";
 
-const useWeatherHours = ({ selectedLocation, dateRange }) => {
+const useWeatherHours = ({ selectedLocation, dateRange, mode }) => {
   return useQuery({
     queryKey: ["weatherDataHourly", selectedLocation, dateRange],
     queryFn: async () => {
@@ -18,7 +18,7 @@ const useWeatherHours = ({ selectedLocation, dateRange }) => {
         return null;
       }
     },
-    enabled: !!selectedLocation,
+    enabled: !!selectedLocation && mode === "historical",
     refetchOnWindowFocus: false,
   });
 };

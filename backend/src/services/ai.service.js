@@ -1,15 +1,14 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { env } from "../config/env.js";
 
 class AIService {
   constructor() {
-    if (!env.geminiApiKey) {
-      throw new Error(
-        "GEMINI_API_KEY no está configurada en las variables de entorno"
-      );
+    if (!env.groqApiKey) {
+      console.warn("⚠️  GROQ_API_KEY no está configurada");
     }
-    this.genAI = new GoogleGenerativeAI(env.geminiApiKey);
-    this.model = this.genAI.getGenerativeModel({ model: "gemini-pro" });
+    this.groq = new Groq({
+      apiKey: env.groqApiKey || process.env.GROQ_API_KEY,
+    });
   }
 
   async interpretWeatherData(weatherData, location) {
@@ -35,9 +34,24 @@ Sé amigable, conciso y usa emojis. Máximo 300 palabras.
 `;
 
     try {
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
+      const completion = await this.groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Eres un meteorólogo experto que explica el clima de forma clara y práctica en español.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 600,
+      });
+
+      return completion.choices[0].message.content;
     } catch (error) {
       console.error("Error en AIService.interpretWeatherData:", error);
       throw new Error("No se pudo generar la interpretación con IA");
@@ -45,33 +59,30 @@ Sé amigable, conciso y usa emojis. Máximo 300 palabras.
   }
 
   async chatWithAI(userMessage, conversationHistory = []) {
-    const systemPrompt = `
-Eres WeatherWise AI, un asistente meteorológico experto que ayuda a las personas a planificar actividades al aire libre usando datos de la NASA.
-
-Tus capacidades:
-- Interpretar datos climáticos históricos de la NASA
-- Recomendar las mejores fechas para actividades específicas
-- Explicar probabilidades climáticas de forma simple
-- Dar consejos sobre qué llevar y cómo prepararse
-
-Características de tus respuestas:
-- Amigable y conversacional
-- Usa emojis relevantes
-- Conciso pero informativo (máximo 250 palabras)
-- Enfócate en consejos prácticos
-- Si te preguntan por un lugar y fecha específicos, menciona que pueden usar el mapa interactivo para datos precisos de la NASA
-
-Responde SIEMPRE en español.
-`;
-
     try {
-      const fullPrompt = `${systemPrompt}\n\nHistorial de conversación:\n${conversationHistory
-        .map((msg) => `${msg.role}: ${msg.content}`)
-        .join("\n")}\n\nUsuario: ${userMessage}\n\nAsistente:`;
+      const messages = [
+        {
+          role: "system",
+          content: `Eres WeatherWise AI, un asistente meteorológico experto que ayuda a las personas a planificar actividades al aire libre usando datos de la NASA. Responde SIEMPRE en español de forma amigable y usa emojis. Máximo 250 palabras.`,
+        },
+        ...conversationHistory.map((msg) => ({
+          role: msg.role === "user" ? "user" : "assistant",
+          content: msg.content,
+        })),
+        {
+          role: "user",
+          content: userMessage,
+        },
+      ];
 
-      const result = await this.model.generateContent(fullPrompt);
-      const response = await result.response;
-      return response.text();
+      const completion = await this.groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: messages,
+        temperature: 0.8,
+        max_tokens: 500,
+      });
+
+      return completion.choices[0].message.content;
     } catch (error) {
       console.error("Error en AIService.chatWithAI:", error);
       throw new Error("No se pudo procesar tu mensaje");
