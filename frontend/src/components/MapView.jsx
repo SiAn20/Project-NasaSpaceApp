@@ -1,14 +1,23 @@
 import React, { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMap,
+  useMapEvents,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Fix para iconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
-  iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
-  shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
 const customIcon = new L.Icon({
@@ -18,7 +27,6 @@ const customIcon = new L.Icon({
   popupAnchor: [0, -32],
 });
 
-// Mantiene los clics activos
 const MapEvents = ({ onLocationSelect }) => {
   useMapEvents({
     click(e) {
@@ -29,12 +37,10 @@ const MapEvents = ({ onLocationSelect }) => {
   return null;
 };
 
-// Recentrar mapa sin recrearlo
 const RecenterMap = ({ position }) => {
   const map = useMap();
   useEffect(() => {
     if (position) {
-      // Solo centrar la vista sin cambiar el zoom
       map.setView(position, map.getZoom());
     }
   }, [position, map]);
@@ -71,7 +77,8 @@ const MapView = ({ onLocationSelect, position, className = "" }) => {
               <div className="text-center">
                 <p className="font-semibold">Ubicación seleccionada</p>
                 <p className="text-sm text-gray-600">
-                  Lat: {position[0].toFixed(4)}<br />
+                  Lat: {position[0].toFixed(4)}
+                  <br />
                   Lon: {position[1].toFixed(4)}
                 </p>
               </div>
