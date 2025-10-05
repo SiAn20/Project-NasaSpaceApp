@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   MapPin,
   Calendar,
@@ -7,23 +7,30 @@ import {
   Share2,
   Clock,
   Sparkles,
-  X,
   Loader2,
+  Lightbulb,
+  RefreshCw,
 } from "lucide-react";
 import WeatherCard from "./WeatherCard";
 
 const WeatherPanel = ({ dataDaily, dataHourly }) => {
   const [selectedTab, setSelectedTab] = useState("overview");
-  const [showAIInsights, setShowAIInsights] = useState(false);
   const [aiInterpretation, setAiInterpretation] = useState("");
   const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [hasLoadedAI, setHasLoadedAI] = useState(false);
 
-  const handleAIInterpretation = async () => {
+  // Cargar interpretación de IA automáticamente cuando se selecciona la pestaña
+  useEffect(() => {
+    if (selectedTab === "ai" && !hasLoadedAI && dataDaily) {
+      loadAIInterpretation();
+    }
+  }, [selectedTab, hasLoadedAI, dataDaily]);
+
+  const loadAIInterpretation = async () => {
     setIsLoadingAI(true);
-    setShowAIInsights(true);
 
     try {
-      const response = await fetch("http://localhost:5000/api/ai/interpret", {
+      const response = await fetch("http://localhost:4000/api/ai/interpret", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -36,17 +43,25 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
 
       if (data.success) {
         setAiInterpretation(data.interpretation);
+        setHasLoadedAI(true);
       } else {
         setAiInterpretation(
-          "❌ No se pudo obtener la interpretación. Intenta de nuevo."
+          "No se pudo obtener la interpretación. Por favor, intenta de nuevo."
         );
       }
     } catch (error) {
       console.error("Error:", error);
-      setAiInterpretation("❌ Error de conexión con el servidor.");
+      setAiInterpretation(
+        "Error de conexión con el servidor. Verifica que el backend esté corriendo."
+      );
     } finally {
       setIsLoadingAI(false);
     }
+  };
+
+  const handleRefreshAI = () => {
+    setHasLoadedAI(false);
+    loadAIInterpretation();
   };
 
   if (!dataDaily) {
@@ -104,76 +119,34 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
           </div>
         </div>
 
-        <div className="flex space-x-4">
-          {["overview", "daily", "hours"].map((tab) => (
+        {/* Pestañas con nueva pestaña de IA */}
+        <div className="flex space-x-2 overflow-x-auto">
+          {[
+            { id: "overview", label: "Resumen", icon: null },
+            { id: "daily", label: "Diario", icon: null },
+            { id: "hours", label: "Horas", icon: null },
+            { id: "ai", label: "Interpretación", icon: Sparkles },
+          ].map((tab) => (
             <button
-              key={tab}
-              onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                selectedTab === tab
-                  ? "bg-blue-500 text-white shadow-lg"
+              key={tab.id}
+              onClick={() => setSelectedTab(tab.id)}
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-all whitespace-nowrap flex items-center space-x-2 ${
+                selectedTab === tab.id
+                  ? tab.id === "ai"
+                    ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg"
+                    : "bg-blue-500 text-white shadow-lg"
                   : "text-gray-600 hover:text-gray-800 hover:bg-gray-100"
               }`}
             >
-              {tab === "overview" && "Resumen"}
-              {tab === "daily" && "Diario"}
-              {tab === "hours" && "Horas"}
+              {tab.icon && <tab.icon size={16} />}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* MODAL DE INSIGHTS DE IA */}
-      {showAIInsights && (
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-fade-in-up">
-            <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-6 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <Sparkles className="text-white" size={24} />
-                <h3 className="text-2xl font-bold text-white">
-                  Interpretación con IA
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowAIInsights(false)}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <X className="text-white" size={24} />
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {isLoadingAI ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2
-                    className="animate-spin text-purple-500 mb-4"
-                    size={48}
-                  />
-                  <p className="text-gray-600">Analizando datos con IA...</p>
-                </div>
-              ) : (
-                <div className="prose prose-lg max-w-none">
-                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                    {aiInterpretation}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={() => setShowAIInsights(false)}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="flex-1 overflow-y-auto p-6">
-        {/* --- TAB OVERVIEW --- */}
+        {/* TAB OVERVIEW */}
         {selectedTab === "overview" && (
           <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
@@ -222,6 +195,25 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
               />
             </div>
 
+            {/* Tip para ver interpretación IA */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-4 border border-purple-200">
+              <div className="flex items-start space-x-3">
+                <Lightbulb
+                  className="text-purple-500 flex-shrink-0"
+                  size={24}
+                />
+                <div>
+                  <p className="font-semibold text-purple-800">
+                    ¿No entiendes estos datos?
+                  </p>
+                  <p className="text-sm text-purple-600 mt-1">
+                    Ve a la pestaña "Interpretación" para obtener una
+                    explicación clara y recomendaciones personalizadas.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="bg-blue-50 rounded-2xl p-4">
               <div className="flex items-center space-x-3">
                 <Cloud className="text-blue-500" size={20} />
@@ -234,7 +226,86 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
           </div>
         )}
 
-        {/* --- TAB DAILY --- */}
+        {/* TAB AI INTERPRETATION */}
+        {selectedTab === "ai" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
+                  <Sparkles className="text-white" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-800">
+                    Interpretación con ChocoSpace IA
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Análisis detallado y recomendaciones personalizadas
+                  </p>
+                </div>
+              </div>
+              {hasLoadedAI && !isLoadingAI && (
+                <button
+                  onClick={handleRefreshAI}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex items-center space-x-2 text-gray-600"
+                  title="Regenerar interpretación"
+                >
+                  <RefreshCw size={18} />
+                </button>
+              )}
+            </div>
+
+            {isLoadingAI ? (
+              <div className="flex flex-col items-center justify-center py-16 space-y-4">
+                <Loader2 className="animate-spin text-purple-500" size={48} />
+                <p className="text-gray-600 font-medium">
+                  Analizando datos climáticos con IA...
+                </p>
+                <p className="text-sm text-gray-500">
+                  Generando recomendaciones personalizadas
+                </p>
+              </div>
+            ) : aiInterpretation ? (
+              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+                <div className="prose prose-lg max-w-none">
+                  <div className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                    {aiInterpretation}
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="flex items-start space-x-3 bg-blue-50 rounded-lg p-4">
+                    <Lightbulb
+                      className="text-blue-500 flex-shrink-0 mt-1"
+                      size={20}
+                    />
+                    <div className="text-sm text-blue-800">
+                      <p className="font-semibold mb-1">Nota:</p>
+                      <p>
+                        Esta interpretación está basada en datos históricos de
+                        la NASA y utiliza inteligencia artificial para
+                        proporcionar recomendaciones. Para pronósticos precisos
+                        a corto plazo, consulta servicios meteorológicos
+                        locales.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+                <p>No se pudo cargar la interpretación.</p>
+                <button
+                  onClick={loadAIInterpretation}
+                  className="mt-4 px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+                >
+                  Reintentar
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB DAILY */}
         {selectedTab === "daily" && (
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-800 mb-4">Datos Diarios</h3>
@@ -280,7 +351,7 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
           </div>
         )}
 
-        {/* --- TAB HOURS --- */}
+        {/* TAB HOURS */}
         {selectedTab === "hours" && (
           <div className="space-y-4">
             <h3 className="font-semibold text-gray-800 mb-4">Datos Horarios</h3>
