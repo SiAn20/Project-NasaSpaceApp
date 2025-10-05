@@ -36,7 +36,7 @@ const WeatherHome = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-2 cursor-pointer group">
-              <div className="relative">
+              <div className="relative mr-2">
                 <Sun className="h-10 w-10 text-yellow-500 group-hover:rotate-180 transition-transform duration-500" />
                 <Cloud className="h-5 w-5 text-blue-400 absolute -bottom-1 -right-1 group-hover:translate-x-1 transition-transform" />
               </div>
@@ -64,7 +64,7 @@ const WeatherHome = () => {
               </a>
               <a
                 onClick={() => navigate("/chat")}
-                className="text-gray-700 hover:text-pink-600 transition-colors font-medium flex items-center space-x-1 group"
+                className="text-gray-700 hover:text-pink-600 transition-colors font-medium flex items-center space-x-1 group cursor-pointer"
               >
                 <TrendingUp
                   size={18}
