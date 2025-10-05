@@ -63,24 +63,14 @@ const WeatherHome = () => {
                 <span>Explorar</span>
               </a>
               <a
-                href="#activities"
-                className="text-gray-700 hover:text-purple-600 transition-colors font-medium flex items-center space-x-1 group"
-              >
-                <Mountain
-                  size={18}
-                  className="group-hover:scale-110 transition-transform"
-                />
-                <span>Actividades</span>
-              </a>
-              <a
-                href="#trends"
+                onClick={() => navigate("/chat")}
                 className="text-gray-700 hover:text-pink-600 transition-colors font-medium flex items-center space-x-1 group"
               >
                 <TrendingUp
                   size={18}
                   className="group-hover:scale-110 transition-transform"
                 />
-                <span>Tendencias</span>
+                <span>Chat</span>
               </a>
               <button
                 onClick={() => navigate("/explorar")}
@@ -109,17 +99,12 @@ const WeatherHome = () => {
               >
                 🗺️ Explorar
               </a>
+
               <a
-                href="#activities"
-                className="block text-gray-700 hover:text-purple-600 transition-colors font-medium py-2"
-              >
-                ⛰️ Actividades
-              </a>
-              <a
-                href="#trends"
+                onClick={() => navigate("/chat")}
                 className="block text-gray-700 hover:text-pink-600 transition-colors font-medium py-2"
               >
-                📈 Tendencias
+                📈 Chat
               </a>
               <button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full hover:shadow-lg transition-all">
                 ✨ Comenzar
