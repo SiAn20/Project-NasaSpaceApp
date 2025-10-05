@@ -109,14 +109,6 @@ const WeatherPanel = ({ dataDaily, dataHourly }) => {
               </span>
             </div>
           </div>
-          <div className="flex space-x-2">
-            <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <Share2 size={20} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <Download size={20} className="text-gray-600" />
-            </button>
-          </div>
         </div>
 
         {/* Pestañas con nueva pestaña de IA */}

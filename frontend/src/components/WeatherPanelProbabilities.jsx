@@ -60,14 +60,6 @@ const WeatherPanelProbabilities = ({ dataProbabilities }) => {
               Fecha objetivo: {targetDate}
             </p>
           </div>
-          <div className="flex space-x-2">
-            <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <Share2 size={20} className="text-gray-600" />
-            </button>
-            <button className="p-2 hover:bg-gray-100 rounded-xl transition-colors">
-              <Download size={20} className="text-gray-600" />
-            </button>
-          </div>
         </div>
 
         {/* Tabs */}
@@ -133,20 +125,13 @@ const WeatherPanelProbabilities = ({ dataProbabilities }) => {
                   <p className="text-sm text-blue-600">
                     {discomfortAnalysis.description}
                   </p>
-                  <p className="text-sm text-blue-600">
-                    Score promedio: {discomfortAnalysis.averageScore} · Días
-                    cómodos: {discomfortAnalysis.comfortableDaysPercentage}% ·
-                    Días incómodos:{" "}
-                    {discomfortAnalysis.uncomfortableDaysPercentage}%
-                  </p>
                 </div>
               </div>
             </div>
 
             <div className="bg-blue-50 rounded-2xl p-4 mt-6">
               <p className="text-sm text-blue-600">
-                Muestra histórica: {historicalSample.yearsAnalyzed} años (
-                {historicalSample.yearRange})
+                Muestra histórica: {historicalSample.yearRange}
               </p>
             </div>
           </div>
